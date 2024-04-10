@@ -1,9 +1,13 @@
 package polyglot.a01b;
-import java.util.Optional;
 
-/** solution and descriptions at https://bitbucket.org/mviroli/oop2019-esami/src/master/a01b/sol2/ */
+import polyglot.CellInGame;
+
 public interface Logics {
-    Optional<Integer> hit(int x, int y);
 
+    void hit(int x, int y);
+    void flagCell(int x, int y);
+    CellInGame getCell(int x, int y);
     boolean won();
+    boolean lost();
+
 }

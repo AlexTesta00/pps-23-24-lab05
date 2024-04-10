@@ -31,6 +31,12 @@ object Sequences: // Essentially, generic linkedlists
         case Cons(h, t) => Cons(h, t.concat(other))
         case _ => other
 
+      def sum(l: Sequence[Int]): Int = l match
+        case Cons(h, t) => h + sum(t)
+        case _ => 0
+
+      def size(): Int = sequence.sum(sequence.map(_ => 1))
+
       def flatMap[B](f: A => Sequence[B]): Sequence[B] = sequence match
         case Cons(h, t) => f(h).concat(t.flatMap(f))
         case _ => Nil()
@@ -51,6 +57,7 @@ object Sequences: // Essentially, generic linkedlists
       def reverse(): Sequence[A] = sequence match
         case Cons(h, t) => t.reverse().concat(Cons(h, Nil()))
         case _ => Nil()
+
 @main def trySequences =
   import Sequences.* 
   val sequence = Sequence(1, 2, 3)

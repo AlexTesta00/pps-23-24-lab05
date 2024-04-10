@@ -4,7 +4,12 @@ import javax.swing.*;
 import java.util.*;
 import java.awt.*;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+
+import polyglot.CellInGame;
 import polyglot.Pair;
+
 public class GUI extends JFrame {
 
     private static final long serialVersionUID = -6218820567019985015L;
@@ -22,16 +27,29 @@ public class GUI extends JFrame {
         ActionListener al = (e)->{
             final JButton bt = (JButton)e.getSource();
             final Pair<Integer,Integer> p = buttons.get(bt);
-            //System.out.println("hit "+p);
-            Optional<Integer> result = logics.hit(p.getX(), p.getY());
-            if (result.isPresent() && !logics.won()) {
-                bt.setText(String.valueOf(result.get()));
-                bt.setEnabled(false);
-            } else {
-                System.out.println(logics.won() ? "WON" : "LOST");
+            this.logics.hit(p.getX(), p.getY());
+            if(this.logics.lost()){
+                this.finishGame();
+                JOptionPane.showMessageDialog(this, "You have lost");
+            }else if(this.logics.won()){
+                this.finishGame();
+                JOptionPane.showMessageDialog(this, "You have won");
                 System.exit(0);
+            }else{
+                updateGUI();
             }
         };
+
+        addMouseListener(new MouseAdapter() {
+            @Override
+            public void mousePressed(MouseEvent e) {
+                final JButton bt = (JButton) e.getSource();
+                if (e.getButton() == MouseEvent.BUTTON3){
+                    logics.flagCell(buttons.get(bt).getX(), buttons.get(bt).getY());
+                }
+                updateGUI();
+            }
+        });
 
         for (int i=0; i<size; i++){
             for (int j=0; j<size; j++){
@@ -43,6 +61,37 @@ public class GUI extends JFrame {
         }
         this.setVisible(true);
     }
+
+    private void updateGUI(){
+        for (var entry : this.buttons.entrySet()) {
+            final CellInGame cellStatus = logics.getCell(entry.getValue().getX(), entry.getValue().getY());
+
+            if (cellStatus.isReveald()) {
+                if (cellStatus.isMine()) {
+                    entry.getKey().setText("*");
+                } else {
+                    entry.getKey().setText(String.valueOf(cellStatus.minesNear()));
+                }
+                entry.getKey().setEnabled(false);
+            } else if (cellStatus.isFlagged()) {
+                entry.getKey().setText("F");
+            } else {
+                entry.getKey().setText(" ");
+            }
+        }
+    }
+
+    private void finishGame(){
+        this.updateGUI();
+        for (var entry : this.buttons.entrySet()) {
+            final CellInGame cellStatus = logics.getCell(entry.getValue().getX(), entry.getValue().getY());
+            if (cellStatus.isMine()) {
+                entry.getKey().setText("*");
+            }
+            entry.getKey().setEnabled(false);
+        }
+    }
+
 
 }
 
