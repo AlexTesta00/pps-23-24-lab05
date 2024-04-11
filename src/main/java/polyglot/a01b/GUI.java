@@ -1,16 +1,19 @@
 package polyglot.a01b;
 
 import javax.swing.*;
+import javax.swing.event.MouseInputListener;
+
 import java.util.*;
 import java.awt.*;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 
 import polyglot.CellInGame;
 import polyglot.Pair;
 
-public class GUI extends JFrame {
+public class GUI extends JFrame{
 
     private static final long serialVersionUID = -6218820567019985015L;
     private final Map<JButton,Pair<Integer,Integer>> buttons = new HashMap<>();
@@ -29,10 +32,10 @@ public class GUI extends JFrame {
             final Pair<Integer,Integer> p = buttons.get(bt);
             this.logics.hit(p.getX(), p.getY());
             if(this.logics.lost()){
-                this.finishGame();
+                this.endGame();
                 JOptionPane.showMessageDialog(this, "You have lost");
             }else if(this.logics.won()){
-                this.finishGame();
+                this.endGame();
                 JOptionPane.showMessageDialog(this, "You have won");
                 System.exit(0);
             }else{
@@ -40,21 +43,23 @@ public class GUI extends JFrame {
             }
         };
 
-        addMouseListener(new MouseAdapter() {
+        //Todo: Mouse right click
+        var adapter = new MouseAdapter(){
             @Override
-            public void mousePressed(MouseEvent e) {
+            public void mouseClicked(MouseEvent e) {
                 final JButton bt = (JButton) e.getSource();
                 if (e.getButton() == MouseEvent.BUTTON3){
                     logics.flagCell(buttons.get(bt).getX(), buttons.get(bt).getY());
                 }
                 updateGUI();
             }
-        });
+        };
 
         for (int i=0; i<size; i++){
             for (int j=0; j<size; j++){
                 final JButton jb = new JButton(" ");
                 jb.addActionListener(al);
+                jb.addMouseListener(adapter);
                 this.buttons.put(jb,new Pair<>(j,i));
                 panel.add(jb);
             }
@@ -81,7 +86,7 @@ public class GUI extends JFrame {
         }
     }
 
-    private void finishGame(){
+    private void endGame(){
         this.updateGUI();
         for (var entry : this.buttons.entrySet()) {
             final CellInGame cellStatus = logics.getCell(entry.getValue().getX(), entry.getValue().getY());
